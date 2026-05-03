@@ -50,15 +50,15 @@ class Employee:
 
     def is_available(self, shift: 'Shift') -> bool:
         for slot in self.available_slots:
-            if self._shift_overlaps_with_slot(shift, slot):
+            if self._shift_fully_covered_by_slot(shift, slot):
                 return True
         return False
 
-    def _shift_overlaps_with_slot(self, shift: 'Shift', slot: TimeSlot) -> bool:
+    def _shift_fully_covered_by_slot(self, shift: 'Shift', slot: TimeSlot) -> bool:
         shift_day = DayOfWeek(shift.date.weekday())
         if shift_day != slot.day_of_week:
             return False
-        return not (shift.end_time <= slot.start_time or slot.end_time <= shift.start_time)
+        return slot.start_time <= shift.start_time and shift.end_time <= slot.end_time
 
     def to_dict(self) -> Dict:
         return {

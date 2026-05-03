@@ -57,7 +57,7 @@ class TestEmployee:
 
         assert employee.is_available(shift) is True
 
-    def test_is_available_partial_overlap(self):
+    def test_is_available_shift_fully_covered(self):
         slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
         employee = Employee(id="e1", name="Test", available_slots=[slot])
 
@@ -66,6 +66,84 @@ class TestEmployee:
             date=date(2026, 5, 4),
             start_time=time(10, 0),
             end_time=time(16, 0)
+        )
+
+        assert employee.is_available(shift) is True
+
+    def test_is_available_exact_match(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(9, 0),
+            end_time=time(17, 0)
+        )
+
+        assert employee.is_available(shift) is True
+
+    def test_is_available_shift_starts_before_slot(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(8, 0),
+            end_time=time(16, 0)
+        )
+
+        assert employee.is_available(shift) is False
+
+    def test_is_available_shift_ends_after_slot(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(10, 0),
+            end_time=time(18, 0)
+        )
+
+        assert employee.is_available(shift) is False
+
+    def test_is_available_partial_overlap_not_covered(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(12, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(11, 0),
+            end_time=time(13, 0)
+        )
+
+        assert employee.is_available(shift) is False
+
+    def test_is_available_boundary_exact_start(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(9, 0),
+            end_time=time(12, 0)
+        )
+
+        assert employee.is_available(shift) is True
+
+    def test_is_available_boundary_exact_end(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="Test", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(14, 0),
+            end_time=time(17, 0)
         )
 
         assert employee.is_available(shift) is True

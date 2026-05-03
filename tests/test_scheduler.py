@@ -240,3 +240,105 @@ class TestShiftScheduler:
 
         assert len(available) == 1
         assert available[0].id == "e1"
+
+    def test_scheduling_shift_not_fully_covered(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(12, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(11, 0),
+            end_time=time(13, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 0
+        assert schedule.has_conflicts()
+
+    def test_scheduling_shift_exact_match(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(9, 0),
+            end_time=time(17, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 1
+        assert not schedule.has_conflicts()
+
+    def test_scheduling_shift_starts_at_slot_boundary(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(9, 0),
+            end_time=time(12, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 1
+        assert not schedule.has_conflicts()
+
+    def test_scheduling_shift_ends_at_slot_boundary(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(14, 0),
+            end_time=time(17, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 1
+        assert not schedule.has_conflicts()
+
+    def test_scheduling_shift_starts_before_slot(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(8, 0),
+            end_time=time(16, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 0
+        assert schedule.has_conflicts()
+
+    def test_scheduling_shift_ends_after_slot(self):
+        slot = TimeSlot(DayOfWeek.MONDAY, time(9, 0), time(17, 0))
+        employee = Employee(id="e1", name="张三", available_slots=[slot])
+
+        shift = Shift(
+            id="s1",
+            date=date(2026, 5, 4),
+            start_time=time(10, 0),
+            end_time=time(18, 0)
+        )
+
+        scheduler = ShiftScheduler([employee], [shift])
+        schedule = scheduler.schedule()
+
+        assert len(schedule.assignments) == 0
+        assert schedule.has_conflicts()
