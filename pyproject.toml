@@ -1,0 +1,22 @@
+[project]
+name = "shift-scheduler"
+version = "0.1.0"
+description = "A shift scheduler CLI tool for managing employee schedules"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0.0",
+]
+
+[project.scripts]
+shift-scheduler = "shift_scheduler.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
